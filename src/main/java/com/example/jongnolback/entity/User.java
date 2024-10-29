@@ -34,6 +34,7 @@ public class User {
                 .id(this.id)
                 .userId(this.userId)
                 .userPw(this.userPw)
+                .userNickName(this.userNickName)
                 .userRegdate(this.userRegdate.toString())
                 .build();
     }

@@ -9,4 +9,6 @@ public interface UserService {
     UserDTO login(UserDTO userDTO);
 
     long idCheck(UserDTO userDTO);
+
+    long nicknameCheck(UserDTO userDTO);
 }

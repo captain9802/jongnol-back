@@ -22,7 +22,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserDTO join(UserDTO userDTO) {
         User user = userRepository.save(userDTO.toEntity());
-
+        System.out.println(user.getUserNickName());
         return user.toDTO();
     }
 
@@ -51,5 +51,10 @@ public class UserServiceImpl implements UserService {
     @Override
     public long idCheck(UserDTO userDTO) {
         return userRepository.countByUserId(userDTO.getUserId());
+    }
+
+    @Override
+    public long nicknameCheck(UserDTO userDTO) {
+        return userRepository.countByUserId(userDTO.getUserNickName());
     }
 }

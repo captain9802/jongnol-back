@@ -3,6 +3,7 @@ package com.example.jongnolback.controller;
 
 import com.example.jongnolback.dto.ResponseDTO;
 import com.example.jongnolback.dto.UserDTO;
+import com.example.jongnolback.entity.User;
 import com.example.jongnolback.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -30,9 +31,7 @@ public class UserController {
         try {
             userDTO.setUserRegdate(LocalDateTime.now().toString());
             userDTO.setUserPw(passwordEncoder.encode(userDTO.getUserPw()));
-
             UserDTO joinUserDTO = userService.join(userDTO);
-
             joinUserDTO.setUserPw("");
 
             responseDTO.setItem(joinUserDTO);
@@ -76,26 +75,41 @@ public class UserController {
         }
     }
 
+    @PostMapping("/nickname-check")
+    public  ResponseEntity<?> nicknameCheck(@RequestBody UserDTO userDTO) {
+        ResponseDTO<Map<String, String>> responseDTO = new ResponseDTO<>();
+        try {
+            long nicknameCheck = userService.nicknameCheck(userDTO);
+            Map<String, String> returnMap = new HashMap<>();
+            if (nicknameCheck == 0) {
+                returnMap.put("nicknameCheckResult", "available nickname");
+            } else {
+                returnMap.put("nicknameCheckResult", "invalid nickname");
+            }
+            responseDTO.setItem(returnMap);
+            responseDTO.setStatusCode(HttpStatus.OK.value());
+
+            return ResponseEntity.ok(responseDTO);
+        } catch (Exception e) {
+            responseDTO.setErrorMessage(e.getMessage());
+            responseDTO.setErrorCode(101);
+            responseDTO.setStatusCode(HttpStatus.BAD_REQUEST.value());
+            return ResponseEntity.badRequest().body(responseDTO);
+        }
+    }
+
     @PostMapping("/id-check")
     public ResponseEntity<?> idCheck(@RequestBody UserDTO userDTO) {
-        System.out.println("1111111111111111111111111111111111111");
         ResponseDTO<Map<String, String>> responseDTO = new ResponseDTO<>();
-        System.out.println("1111111111111111111111111111111111111");
         try {
             long idCheck = userService.idCheck(userDTO);
-            System.out.println("1111111111111111111111111111111111111");
-
             Map<String, String> returnMap = new HashMap<>();
-
             if(idCheck == 0) {
-                System.out.println("22222222222222222222223322222222222");
                 returnMap.put("idCheckResult", "available id");
 
             } else {
-                System.out.println("3333333333333333333333333333");
                 returnMap.put("idCheckResult", "invalid id");
             }
-
             responseDTO.setItem(returnMap);
             responseDTO.setStatusCode(HttpStatus.OK.value());
 

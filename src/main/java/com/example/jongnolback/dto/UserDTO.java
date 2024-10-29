@@ -25,7 +25,7 @@ public class UserDTO {
                 .id(this.id)
                 .userId(this.userId)
                 .userPw(this.userPw)
-
+                .userNickName(this.userNickName)
                 .userRegdate(LocalDateTime.parse(this.userRegdate))
                 .build();
     }
