@@ -23,7 +23,7 @@ public class User {
     )
     private long id;
     @Column(unique = true)
-    private String userId;
+    private String userName;
     private String userPw;
     private String userNickName;
     private LocalDateTime userRegdate;
@@ -32,7 +32,7 @@ public class User {
     public UserDTO toDTO() {
         return UserDTO.builder()
                 .id(this.id)
-                .userId(this.userId)
+                .userName(this.userName)
                 .userPw(this.userPw)
                 .userNickName(this.userNickName)
                 .userRegdate(this.userRegdate.toString())

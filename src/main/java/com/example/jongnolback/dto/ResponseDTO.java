@@ -15,4 +15,8 @@ public class ResponseDTO<T> {
     private int statusCode;
     private int errorCode;
     private String errorMessage;
+
+    public void setData(T item) {
+        this.item = item;  // item에 데이터 할당
+    }
 }

@@ -28,7 +28,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDTO login(UserDTO userDTO) {
-        Optional<User> loginUser = userRepository.findByUserId(userDTO.getUserId());
+        Optional<User> loginUser = userRepository.findByUserName(userDTO.getUserName());
 
         if(loginUser.isEmpty()) {
             throw new RuntimeException("not exist userid");
@@ -50,11 +50,12 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public long idCheck(UserDTO userDTO) {
-        return userRepository.countByUserId(userDTO.getUserId());
+        return userRepository.countByUserName(userDTO.getUserName());
     }
 
     @Override
     public long nicknameCheck(UserDTO userDTO) {
-        return userRepository.countByUserId(userDTO.getUserNickName());
+        System.out.println("11111111111111" + userDTO.getUserNickName() );
+        return userRepository.countByUserNickName(userDTO.getUserNickName());
     }
 }

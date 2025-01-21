@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
 @Setter
 public class UserDTO {
     private long id;
-    private String userId;
+    private String userName;
     private String userPw;
     private String userNickName;
     private String userRegdate;
@@ -23,7 +23,7 @@ public class UserDTO {
     public User toEntity() {
         return User.builder()
                 .id(this.id)
-                .userId(this.userId)
+                .userName(this.userName)
                 .userPw(this.userPw)
                 .userNickName(this.userNickName)
                 .userRegdate(LocalDateTime.parse(this.userRegdate))

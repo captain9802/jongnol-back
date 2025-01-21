@@ -50,14 +50,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             // 토큰 값이 있으면 토큰 값이 담기고
             // 없으면 null이 담긴다.
             String token = parseBearerToken(request);
-
             // 토큰 검사 및 securit context 등록
             if(token != null && !token.equalsIgnoreCase("null")) {
                 // 토큰의 유효성 검사 및 username 가져오기
                 String userId = jwtTokenProvider.validateAndGetUsername(token);
 
                 UserDetails userDetails = userDetailsService.loadUserByUsername(userId);
-
                 // 유효성 검사 완료된 토큰 시큐리티에 인증된 사용자로 등록
                 AbstractAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
                         userDetails, null, userDetails.getAuthorities()
@@ -67,6 +65,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 SecurityContext securityContext = SecurityContextHolder.getContext();
                 securityContext.setAuthentication(authenticationToken);
                 SecurityContextHolder.setContext(securityContext);
+
             }
 
         } catch(Exception e) {
