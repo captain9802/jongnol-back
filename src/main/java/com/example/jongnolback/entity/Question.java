@@ -17,31 +17,30 @@ public class Question {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id; // 문제 고유 ID
+    private Long id;
 
     @Column(nullable = false)
-    private int quizNumber; // 퀴즈 번호 (문제의 순서)
+    private int quizNumber;
 
     @Column(nullable = false)
-    private int type; // 문제 유형 (0: 객관식, 1: 주관식)
+    private int type;
 
     @Column(nullable = false)
-    private String subtitle; // 문제 제목 (설명)
+    private String subtitle;
 
     @Column(nullable = false)
-    private String tanswer; // 정답
+    private String tanswer;
 
     @ElementCollection
     @CollectionTable(name = "question_fanswers", joinColumns = @JoinColumn(name = "question_id"))
     @Column(name = "fanswer")
     private List<String> fanswers;
 
-    private String imageBox; // 문제 이미지 (Base64 또는 파일 경로)
+    private String imageBox;
 
-    // Quiz 엔티티와의 관계 설정 (단방향)
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "quiz_id", nullable = false)
-    private Quiz quiz; // Quiz와 연결 (단방향 관계)
+    private Quiz quiz;
 
     public QuestionDTO toDTO() {
         return QuestionDTO.builder()

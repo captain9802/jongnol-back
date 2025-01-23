@@ -7,10 +7,13 @@ import com.example.jongnolback.entity.Quiz;
 import com.example.jongnolback.entity.User;
 import com.example.jongnolback.repository.QuestionRepository;
 import com.example.jongnolback.repository.QuizRepository;
+import com.example.jongnolback.repository.QuizRepositoryCustom;
 import com.example.jongnolback.repository.UserRepository;
 import com.example.jongnolback.service.QuizService;
+import com.mysql.cj.protocol.x.Notice;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -56,5 +59,12 @@ public class QuizServiceImpl implements QuizService {
 
         // 저장된 퀴즈를 DTO로 변환하여 반환
         return quiz.toDTO();
+    }
+
+    @Override
+    public List<QuizDTO> getQuizzes(String searchCondition, String searchKeyword, int offset, int limit) {
+        List<Quiz> quizzes = quizRepository.searchAll(searchCondition, searchKeyword, offset, limit);
+
+        return quizzes.stream().map(quiz -> quiz.toDTO()).collect(Collectors.toList());
     }
 }
