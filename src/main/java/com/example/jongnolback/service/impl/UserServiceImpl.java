@@ -55,7 +55,11 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public long nicknameCheck(UserDTO userDTO) {
-        System.out.println("11111111111111" + userDTO.getUserNickName() );
         return userRepository.countByUserNickName(userDTO.getUserNickName());
+    }
+
+    @Override
+    public long getUserCount() {
+        return userRepository.count();
     }
 }

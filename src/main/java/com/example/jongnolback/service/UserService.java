@@ -11,4 +11,6 @@ public interface UserService {
     long idCheck(UserDTO userDTO);
 
     long nicknameCheck(UserDTO userDTO);
+
+    long getUserCount();
 }

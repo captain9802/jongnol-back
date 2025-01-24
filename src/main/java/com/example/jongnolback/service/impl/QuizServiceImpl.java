@@ -65,6 +65,21 @@ public class QuizServiceImpl implements QuizService {
     public List<QuizDTO> getQuizzes(String searchCondition, String searchKeyword, int offset, int limit) {
         List<Quiz> quizzes = quizRepository.searchAll(searchCondition, searchKeyword, offset, limit);
 
-        return quizzes.stream().map(quiz -> quiz.toDTO()).collect(Collectors.toList());
+        return quizzes.stream()
+                .map(quiz -> QuizDTO.builder()
+                        .id(quiz.getId())
+                        .title(quiz.getTitle())
+                        .description(quiz.getDescription())
+                        .createdAt(quiz.getCreatedAt().toString())
+                        .thumbnail(quiz.getThumbnail())
+                        .userId(quiz.getUser().getId())
+                        .build())
+                .collect(Collectors.toList());
     }
+
+    @Override
+    public long getQuizCount() {
+        return quizRepository.count();
+    }
+
 }

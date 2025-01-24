@@ -17,7 +17,9 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @RestController
@@ -50,25 +52,16 @@ public class QuizController {
             @RequestParam("searchCondition") String searchCondition,
             @RequestParam("searchKeyword") String searchKeyword,
             @RequestParam(value = "offset", defaultValue = "0") int offset,
-            @RequestParam(value = "limit", defaultValue = "18") int limit
+            @RequestParam(value = "limit", defaultValue = "20") int limit
     ) {
         ResponseDTO<List<QuizDTO>> responseDTO = new ResponseDTO<>();
         try {
             List<QuizDTO> quizzes = quizService.getQuizzes(searchCondition, searchKeyword, offset, limit);
 
-            List<QuizDTO> quizDTOList = quizzes.stream()
-                    .map(quiz -> QuizDTO.builder()
-                            .id(quiz.getId())
-                            .title(quiz.getTitle())
-                            .description(quiz.getDescription())
-                            .searchCondition(searchCondition)
-                            .searchKeyword(searchKeyword)
-                            .createdAt(quiz.getCreatedAt())
-                            .thumbnail(quiz.getThumbnail())
-                            .userId(quiz.getUserId())
-                            .build())
-                    .collect(Collectors.toList());
+            boolean hasMoreData = quizzes.size() == limit;
 
+            System.out.println(hasMoreData);
+            responseDTO.setHasMore(hasMoreData);
             responseDTO.setItem(quizzes);
             responseDTO.setStatusCode(HttpStatus.OK.value());
 
@@ -83,4 +76,22 @@ public class QuizController {
         }
     }
 
+    @GetMapping("/getcountqp")
+    public ResponseEntity<?> getQuizList() {
+        Map<String, Object> responseData = new HashMap<>();
+        try {
+            long quizzesCount = quizService.getQuizCount();
+            long usersCount = userService.getUserCount();
+
+            responseData.put("usersCount", usersCount);
+            responseData.put("quizzesCount", quizzesCount);
+            return ResponseEntity.ok(responseData);
+        } catch (Exception e) {
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("errorCode", 103);
+            errorResponse.put("errorMessage", e.getMessage());
+            errorResponse.put("statusCode", HttpStatus.BAD_REQUEST.value());
+            return ResponseEntity.badRequest().body(errorResponse);
+        }
+    }
 }

@@ -10,4 +10,5 @@ public interface QuizService {
 
     List<QuizDTO> getQuizzes(String searchCondition, String searchKeyword, int offset, int limit);
 
+    long getQuizCount();
 }
