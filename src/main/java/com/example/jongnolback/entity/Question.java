@@ -1,6 +1,7 @@
 package com.example.jongnolback.entity;
 
 import com.example.jongnolback.dto.QuestionDTO;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -40,6 +41,7 @@ public class Question {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "quiz_id", nullable = false)
+    @JsonBackReference
     private Quiz quiz;
 
     public QuestionDTO toDTO() {

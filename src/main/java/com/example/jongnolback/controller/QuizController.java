@@ -5,6 +5,7 @@ import com.example.jongnolback.dto.QuizDTO;
 import com.example.jongnolback.dto.ResponseDTO;
 import com.example.jongnolback.dto.UserDTO;
 import com.example.jongnolback.entity.CustomUserDetails;
+import com.example.jongnolback.entity.Question;
 import com.example.jongnolback.entity.Quiz;
 import com.example.jongnolback.entity.User;
 import com.example.jongnolback.service.QuizService;
@@ -44,6 +45,21 @@ public class QuizController {
             responseDTO.setErrorMessage(e.getMessage());
             responseDTO.setStatusCode(HttpStatus.BAD_REQUEST.value());
             return ResponseEntity.badRequest().body(responseDTO);
+        }
+    }
+
+    @GetMapping("/solvequiz/{id}")
+    public  ResponseEntity<?> solvequiz(@PathVariable Long id) {
+
+        try {
+            System.out.println("@@@@@@@@@@@ id : " + id);
+            Quiz quiz = quizService.findById(id);
+            System.out.println("@@@@@@@@@@@ get id : " + quiz.getId());
+            System.out.println(quiz.getQuestions());
+            return ResponseEntity.ok(quiz);
+        } catch(Exception e) {
+            System.out.println(e.getMessage());
+            return ResponseEntity.badRequest().body("An error occurred: " + e.getMessage());
         }
     }
 

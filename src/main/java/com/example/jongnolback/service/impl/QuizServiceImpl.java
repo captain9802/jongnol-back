@@ -11,6 +11,7 @@ import com.example.jongnolback.repository.QuizRepositoryCustom;
 import com.example.jongnolback.repository.UserRepository;
 import com.example.jongnolback.service.QuizService;
 import com.mysql.cj.protocol.x.Notice;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -73,6 +74,7 @@ public class QuizServiceImpl implements QuizService {
                         .createdAt(quiz.getCreatedAt().toString())
                         .thumbnail(quiz.getThumbnail())
                         .userId(quiz.getUser().getId())
+                        .questionsCount(quiz.getQuestions().size())
                         .build())
                 .collect(Collectors.toList());
     }
@@ -80,6 +82,25 @@ public class QuizServiceImpl implements QuizService {
     @Override
     public long getQuizCount() {
         return quizRepository.count();
+    }
+
+    @Override
+    public Quiz findById(Long id) {
+
+        Quiz question =  quizRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Quiz not found with id: " + id));
+
+        System.out.println("@@@@@@@@@@@ question : " + question.getId());
+
+        Quiz quiz = Quiz.builder()
+                .id(question.getId())
+                .title(question.getTitle())
+                .description(question.getDescription())
+                .createdAt(question.getCreatedAt())
+                .user(question.getUser())
+                .questions(question.getQuestions())
+                .build();
+
+        return quiz;
     }
 
 }

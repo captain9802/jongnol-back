@@ -44,6 +44,7 @@ public class SecurityConfiguration {
                     authorizeRequests.requestMatchers("/quiz/newquiz").permitAll();
                     authorizeRequests.requestMatchers("/quiz/getquiz").permitAll();
                     authorizeRequests.requestMatchers("/quiz/getcountqp").permitAll();
+                    authorizeRequests.requestMatchers("/quiz/solvequiz/{id}").permitAll();
                     authorizeRequests.requestMatchers("/user/nickname-check").permitAll();
                     authorizeRequests.anyRequest().authenticated();
                 })
