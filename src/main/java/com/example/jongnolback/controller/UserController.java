@@ -145,4 +145,30 @@ public class UserController {
             return ResponseEntity.badRequest().body(responseDTO);
         }
     }
+        @PostMapping("/updateprofile")
+        public ResponseEntity<?> updateProfile(
+                @RequestParam String nickname,
+                @RequestParam String profileImage) {
+
+            ResponseDTO<Map<String, String>> responseDTO = new ResponseDTO<>();
+            try {
+                // 서비스에서 프로필 정보 업데이트 처리
+//                Map<String, String> updatedProfile = userService.updateProfile(nickname, file);
+                System.out.println("nickname : " + nickname);
+                System.out.println("profileImage : " + profileImage);
+
+                // 결과를 responseDTO에 담아서 반환
+//                responseDTO.setItem(updatedProfile);
+                responseDTO.setStatusCode(HttpStatus.OK.value());
+
+                return ResponseEntity.ok(responseDTO);
+
+            } catch (Exception e) {
+                responseDTO.setErrorMessage(e.getMessage());
+                responseDTO.setErrorCode(101);
+                responseDTO.setStatusCode(HttpStatus.BAD_REQUEST.value());
+                return ResponseEntity.badRequest().body(responseDTO);
+
+        }
+    }
 }

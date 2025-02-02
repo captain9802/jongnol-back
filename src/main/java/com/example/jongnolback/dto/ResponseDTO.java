@@ -17,6 +17,7 @@ public class ResponseDTO<T> {
     private int errorCode;
     private String errorMessage;
     private boolean hasMore;
+    private  String searchKeyword;
     public void setData(T item) {
         this.item = item;
     }

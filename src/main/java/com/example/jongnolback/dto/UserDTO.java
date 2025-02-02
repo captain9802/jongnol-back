@@ -19,7 +19,7 @@ public class UserDTO {
     private String curUserPw;
     private String role;
     private String token;
-
+    private String profileImg;
     public User toEntity() {
         return User.builder()
                 .id(this.id)
@@ -27,6 +27,7 @@ public class UserDTO {
                 .userPw(this.userPw)
                 .userNickName(this.userNickName)
                 .userRegdate(LocalDateTime.parse(this.userRegdate))
+                .profileImg(this.profileImg)
                 .build();
     }
 }

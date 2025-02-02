@@ -22,14 +22,8 @@ public class QuizRepositoryCustomImpl implements QuizRepositoryCustom {
     public List<Quiz> searchAll(String searchCondition, String searchKeyword, int offset, int limit) {
         StringBuilder queryStr = new StringBuilder("SELECT q FROM Quiz q WHERE 1=1");
 
-        if ("all".equalsIgnoreCase(searchKeyword)) {
-            if ("title".equalsIgnoreCase(searchCondition)) {
-                queryStr.append(" AND q.title IS NOT NULL");
-            }
-        } else {
-            if ("title".equalsIgnoreCase(searchCondition)) {
-                queryStr.append(" AND q.title LIKE :searchKeyword");
-            }
+        if (!"all".equalsIgnoreCase(searchKeyword) && searchKeyword != null && !searchKeyword.isEmpty()) {
+            queryStr.append(" AND (q.title LIKE :searchKeyword OR q.description LIKE :searchKeyword)");
         }
 
         TypedQuery<Quiz> query = entityManager.createQuery(queryStr.toString(), Quiz.class);

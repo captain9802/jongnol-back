@@ -28,6 +28,7 @@ public class User {
     private String userNickName;
     private LocalDateTime userRegdate;
     private String role;
+    private String profileImg;
 
     public UserDTO toDTO() {
         return UserDTO.builder()
@@ -36,6 +37,7 @@ public class User {
                 .userPw(this.userPw)
                 .userNickName(this.userNickName)
                 .userRegdate(this.userRegdate.toString())
+                .profileImg(this.profileImg)
                 .build();
     }
 }

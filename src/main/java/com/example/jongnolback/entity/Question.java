@@ -37,6 +37,7 @@ public class Question {
     @Column(name = "fanswer")
     private List<String> fanswers;
 
+    @Lob
     private String imageBox;
 
     @ManyToOne(fetch = FetchType.LAZY)
