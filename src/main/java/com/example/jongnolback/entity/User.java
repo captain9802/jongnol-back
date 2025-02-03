@@ -28,7 +28,7 @@ public class User {
     private String userNickName;
     private LocalDateTime userRegdate;
     private String role;
-    private String profileImg;
+    private long profileImg;
 
     public UserDTO toDTO() {
         return UserDTO.builder()

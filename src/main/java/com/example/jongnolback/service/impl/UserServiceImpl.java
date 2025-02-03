@@ -21,8 +21,8 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDTO join(UserDTO userDTO) {
+        userDTO.setProfileImg(31);
         User user = userRepository.save(userDTO.toEntity());
-        System.out.println(user.getUserNickName());
         return user.toDTO();
     }
 
@@ -61,5 +61,12 @@ public class UserServiceImpl implements UserService {
     @Override
     public long getUserCount() {
         return userRepository.count();
+    }
+
+    @Override
+    public void updateProfile(UserDTO user, UserDTO userDTO) {
+        user.setUserNickName(userDTO.getUserNickName());
+        user.setProfileImg(userDTO.getProfileImg());
+        userRepository.save(user.toEntity());
     }
 }

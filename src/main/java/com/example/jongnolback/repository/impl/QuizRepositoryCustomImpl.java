@@ -1,5 +1,6 @@
 package com.example.jongnolback.repository.impl;
 
+import com.example.jongnolback.entity.CustomUserDetails;
 import com.example.jongnolback.entity.Quiz;
 import com.example.jongnolback.repository.QuizRepositoryCustom;
 import jakarta.persistence.EntityManager;
@@ -35,6 +36,16 @@ public class QuizRepositoryCustomImpl implements QuizRepositoryCustom {
         query.setFirstResult(offset);
         query.setMaxResults(limit);
 
+        return query.getResultList();
+    }
+
+    @Override
+    public List<Quiz> findQuizzesByUserId(long userId, int offset, int limit) {
+        String hql = "SELECT q FROM Quiz q WHERE q.user.id = :userId ORDER BY q.id DESC";
+        TypedQuery<Quiz> query = entityManager.createQuery(hql, Quiz.class);
+        query.setParameter("userId", userId);
+        query.setFirstResult(offset);
+        query.setMaxResults(limit);
         return query.getResultList();
     }
 }

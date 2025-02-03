@@ -2,6 +2,7 @@ package com.example.jongnolback.service;
 
 
 import com.example.jongnolback.dto.UserDTO;
+import com.example.jongnolback.entity.User;
 
 public interface UserService {
     UserDTO join(UserDTO userDTO);
@@ -13,4 +14,6 @@ public interface UserService {
     long nicknameCheck(UserDTO userDTO);
 
     long getUserCount();
+
+    void updateProfile(UserDTO user, UserDTO userDTO);
 }

@@ -19,7 +19,7 @@ public class UserDTO {
     private String curUserPw;
     private String role;
     private String token;
-    private String profileImg;
+    private long profileImg;
     public User toEntity() {
         return User.builder()
                 .id(this.id)

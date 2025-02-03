@@ -3,11 +3,13 @@ package com.example.jongnolback.controller;
 
 import com.example.jongnolback.dto.ResponseDTO;
 import com.example.jongnolback.dto.UserDTO;
+import com.example.jongnolback.entity.CustomUserDetails;
 import com.example.jongnolback.entity.User;
 import com.example.jongnolback.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -146,23 +148,26 @@ public class UserController {
         }
     }
         @PostMapping("/updateprofile")
-        public ResponseEntity<?> updateProfile(
-                @RequestParam String nickname,
-                @RequestParam String profileImage) {
+        public ResponseEntity<?> updateProfile(@RequestBody UserDTO userDTO, @AuthenticationPrincipal CustomUserDetails customUserDetails) {
 
-            ResponseDTO<Map<String, String>> responseDTO = new ResponseDTO<>();
+            ResponseDTO<UserDTO> responseDTO = new ResponseDTO<>();
             try {
-                // 서비스에서 프로필 정보 업데이트 처리
-//                Map<String, String> updatedProfile = userService.updateProfile(nickname, file);
-                System.out.println("nickname : " + nickname);
-                System.out.println("profileImage : " + profileImage);
-
-                // 결과를 responseDTO에 담아서 반환
-//                responseDTO.setItem(updatedProfile);
+                UserDTO user = customUserDetails.getUser().toDTO();
+                long idCheck = userService.nicknameCheck(userDTO);
+                if (!user.getUserNickName().equals(userDTO.getUserNickName())) {
+                    if (idCheck == 0) {
+                        userService.updateProfile(user,userDTO);
+                    } else {
+                        responseDTO.setErrorMessage("중복된 닉네임입니다.");
+                        responseDTO.setErrorCode(102);
+                        responseDTO.setStatusCode(HttpStatus.BAD_REQUEST.value());
+                        return ResponseEntity.badRequest().body(responseDTO);
+                    }
+                }
+                userService.updateProfile(user, userDTO);
+                responseDTO.setItem(user);
                 responseDTO.setStatusCode(HttpStatus.OK.value());
-
                 return ResponseEntity.ok(responseDTO);
-
             } catch (Exception e) {
                 responseDTO.setErrorMessage(e.getMessage());
                 responseDTO.setErrorCode(101);

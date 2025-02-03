@@ -92,6 +92,35 @@ public class QuizController {
         }
     }
 
+    @GetMapping("/getmyquiz")
+    public ResponseEntity<?> getMyQuizList(@AuthenticationPrincipal CustomUserDetails customUserDetails,
+            @RequestParam(value = "offset", defaultValue = "0") int offset,
+            @RequestParam(value = "limit", defaultValue = "20") int limit
+    ) {
+        ResponseDTO<List<QuizDTO>> responseDTO = new ResponseDTO<>();
+        try {
+            System.out.println("customUserDetails :" + customUserDetails.getUser());
+            System.out.println("offset : " + offset);
+            System.out.println("limit :" + limit);
+            List<QuizDTO> quizzes = quizService.getMyQuizzes(customUserDetails, offset, limit);
+
+            boolean hasMoreData = quizzes.size() == limit;
+
+            responseDTO.setHasMore(hasMoreData);
+            responseDTO.setItem(quizzes);
+            responseDTO.setStatusCode(HttpStatus.OK.value());
+
+            return ResponseEntity.ok(responseDTO);
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+            responseDTO.setErrorCode(402);
+            responseDTO.setErrorMessage(e.getMessage());
+            responseDTO.setStatusCode(HttpStatus.BAD_REQUEST.value());
+
+            return ResponseEntity.badRequest().body(responseDTO);
+        }
+    }
+
     @GetMapping("/getcountqp")
     public ResponseEntity<?> getQuizList() {
         Map<String, Object> responseData = new HashMap<>();

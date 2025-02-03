@@ -2,6 +2,7 @@ package com.example.jongnolback.service.impl;
 
 import com.example.jongnolback.dto.QuestionDTO;
 import com.example.jongnolback.dto.QuizDTO;
+import com.example.jongnolback.entity.CustomUserDetails;
 import com.example.jongnolback.entity.Question;
 import com.example.jongnolback.entity.Quiz;
 import com.example.jongnolback.entity.User;
@@ -89,8 +90,6 @@ public class QuizServiceImpl implements QuizService {
 
         Quiz question =  quizRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Quiz not found with id: " + id));
 
-        System.out.println("@@@@@@@@@@@ question : " + question.getId());
-
         Quiz quiz = Quiz.builder()
                 .id(question.getId())
                 .title(question.getTitle())
@@ -103,4 +102,20 @@ public class QuizServiceImpl implements QuizService {
         return quiz;
     }
 
+    @Override
+    public List<QuizDTO> getMyQuizzes(CustomUserDetails customUserDetails, int offset, int limit) {
+        long userId = customUserDetails.getUser().getId();
+        List<Quiz> quizzes = quizRepository.findQuizzesByUserId(userId, offset, limit);
+
+        return quizzes.stream().map(quiz -> QuizDTO.builder()
+                         .id(quiz.getId())
+                        .title(quiz.getTitle())
+                        .description(quiz.getDescription())
+                        .createdAt(quiz.getCreatedAt().toString())
+                        .thumbnail(quiz.getThumbnail())
+                        .userId(quiz.getUser().getId())
+                        .questionsCount(quiz.getQuestions().size())
+                        .build())
+                .collect(Collectors.toList());
+    }
 }
