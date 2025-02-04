@@ -8,6 +8,8 @@ import com.example.jongnolback.entity.CustomUserDetails;
 import com.example.jongnolback.entity.Question;
 import com.example.jongnolback.entity.Quiz;
 import com.example.jongnolback.entity.User;
+import com.example.jongnolback.repository.QuestionRepository;
+import com.example.jongnolback.service.QuestionService;
 import com.example.jongnolback.service.QuizService;
 import com.example.jongnolback.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -18,6 +20,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -29,7 +32,7 @@ import java.util.stream.Collectors;
 public class QuizController {
     private final UserService userService;
     private final QuizService quizService;
-
+    private final QuestionService questionService;
     @PostMapping("/newquiz")
     public ResponseEntity<?> newquiz(@RequestBody QuizDTO quizDTO ,
                                                             @AuthenticationPrincipal CustomUserDetails customUserDetails) {
@@ -131,6 +134,27 @@ public class QuizController {
             responseData.put("usersCount", usersCount);
             responseData.put("quizzesCount", quizzesCount);
             return ResponseEntity.ok(responseData);
+        } catch (Exception e) {
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("errorCode", 103);
+            errorResponse.put("errorMessage", e.getMessage());
+            errorResponse.put("statusCode", HttpStatus.BAD_REQUEST.value());
+            return ResponseEntity.badRequest().body(errorResponse);
+        }
+    }
+
+    @PostMapping("/completequiz")
+    public ResponseEntity<?> completequiz(@RequestBody List<QuestionDTO> questionDTOList) {
+        Map<Long, Boolean> answerResults = new HashMap<>();
+        try {
+            for (QuestionDTO questionDTO : questionDTOList) {
+                Question question = questionService.findById(questionDTO.getId())
+                        .orElseThrow(() -> new RuntimeException("Question not found for id: " + questionDTO.getId()));
+
+                boolean isCorrect = Arrays.asList(question.getTanswer().split(",")).contains(questionDTO.getTanswer());
+                answerResults.put(questionDTO.getId(), isCorrect);
+            }
+            return ResponseEntity.ok(answerResults);
         } catch (Exception e) {
             Map<String, Object> errorResponse = new HashMap<>();
             errorResponse.put("errorCode", 103);
