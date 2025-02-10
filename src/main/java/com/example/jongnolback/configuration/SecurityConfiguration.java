@@ -40,6 +40,7 @@ public class SecurityConfiguration {
                     authorizeRequests.requestMatchers("/user/logout").permitAll();
                     authorizeRequests.requestMatchers("/user/login").permitAll();
                     authorizeRequests.requestMatchers("/user/join").permitAll();
+                    authorizeRequests.requestMatchers("/user/deleteuser").permitAll();
                     authorizeRequests.requestMatchers("/user/id-check").permitAll();
                     authorizeRequests.requestMatchers("/user/updateprofile").permitAll();
                     authorizeRequests.requestMatchers("/quiz/newquiz").permitAll();
@@ -48,6 +49,7 @@ public class SecurityConfiguration {
                     authorizeRequests.requestMatchers("/quiz/getcountqp").permitAll();
                     authorizeRequests.requestMatchers("/quiz/completequiz").permitAll();
                     authorizeRequests.requestMatchers("/quiz/solvequiz/{id}").permitAll();
+                    authorizeRequests.requestMatchers("/quiz/deletequiz/{id}").permitAll();
                     authorizeRequests.requestMatchers("/user/nickname-check").permitAll();
                     authorizeRequests.anyRequest().authenticated();
                 })

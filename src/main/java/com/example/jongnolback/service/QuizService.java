@@ -18,4 +18,6 @@ public interface QuizService {
     Quiz findById(Long id);
 
     List<QuizDTO> getMyQuizzes(CustomUserDetails customUserDetails, int offset, int limit);
+
+    void deleteById(Long id);
 }

@@ -55,10 +55,7 @@ public class QuizController {
     public  ResponseEntity<?> solvequiz(@PathVariable Long id) {
 
         try {
-            System.out.println("@@@@@@@@@@@ id : " + id);
             Quiz quiz = quizService.findById(id);
-            System.out.println("@@@@@@@@@@@ get id : " + quiz.getId());
-            System.out.println(quiz.getQuestions());
             return ResponseEntity.ok(quiz);
         } catch(Exception e) {
             System.out.println(e.getMessage());
@@ -79,7 +76,6 @@ public class QuizController {
 
             boolean hasMoreData = quizzes.size() == limit;
 
-            System.out.println(hasMoreData);
             responseDTO.setHasMore(hasMoreData);
             responseDTO.setItem(quizzes);
             responseDTO.setStatusCode(HttpStatus.OK.value());
@@ -102,9 +98,6 @@ public class QuizController {
     ) {
         ResponseDTO<List<QuizDTO>> responseDTO = new ResponseDTO<>();
         try {
-            System.out.println("customUserDetails :" + customUserDetails.getUser());
-            System.out.println("offset : " + offset);
-            System.out.println("limit :" + limit);
             List<QuizDTO> quizzes = quizService.getMyQuizzes(customUserDetails, offset, limit);
 
             boolean hasMoreData = quizzes.size() == limit;
@@ -117,6 +110,31 @@ public class QuizController {
         } catch (Exception e) {
             System.out.println(e.getMessage());
             responseDTO.setErrorCode(402);
+            responseDTO.setErrorMessage(e.getMessage());
+            responseDTO.setStatusCode(HttpStatus.BAD_REQUEST.value());
+
+            return ResponseEntity.badRequest().body(responseDTO);
+        }
+    }
+    @DeleteMapping("/deletequiz/{id}")
+    public ResponseEntity<?> deletequiz(@PathVariable Long id, @AuthenticationPrincipal CustomUserDetails customUserDetails
+    ) {
+        ResponseDTO<QuizDTO> responseDTO = new ResponseDTO<>();
+        try {
+            Quiz quiz = quizService.findById(id);
+            if (quiz.getUser().getId() == customUserDetails.getUser().getId()) {
+                quizService.deleteById(id);
+                responseDTO.setStatusCode(HttpStatus.OK.value());
+                return ResponseEntity.ok(responseDTO);
+            } else {
+                responseDTO.setErrorCode(500);
+                responseDTO.setErrorMessage("이 퀴즈를 삭제할 권한이 없습니다.");
+                responseDTO.setStatusCode(HttpStatus.FORBIDDEN.value());
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body(responseDTO);
+            }
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+            responseDTO.setErrorCode(404);
             responseDTO.setErrorMessage(e.getMessage());
             responseDTO.setStatusCode(HttpStatus.BAD_REQUEST.value());
 

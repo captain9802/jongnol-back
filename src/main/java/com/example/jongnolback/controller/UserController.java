@@ -54,6 +54,8 @@ public class UserController {
 
         try {
             UserDTO loginUserDTO = userService.login(userDTO);
+            System.out.println("loginUserDTO :" + loginUserDTO.getUserName());
+            System.out.println("loginUserDTO :" + loginUserDTO.getUserNickName());
 
             loginUserDTO.setUserPw("");
 
@@ -137,6 +139,24 @@ public class UserController {
             msgMap.put("logoutMsg", "logout success");
 
             responseDTO.setItem(msgMap);
+            responseDTO.setStatusCode(HttpStatus.OK.value());
+
+            return ResponseEntity.ok(responseDTO);
+        } catch (Exception e) {
+            responseDTO.setErrorMessage(e.getMessage());
+            responseDTO.setErrorCode(202);
+            responseDTO.setStatusCode(HttpStatus.BAD_REQUEST.value());
+            return ResponseEntity.badRequest().body(responseDTO);
+        }
+    }
+
+    @DeleteMapping("/deleteuser")
+    public ResponseEntity<?> deleteuser(@AuthenticationPrincipal CustomUserDetails customUserDetails) {
+        ResponseDTO<UserDTO> responseDTO = new ResponseDTO<>();
+        try {
+
+            userService.deleteById(customUserDetails.getUser().getId());
+
             responseDTO.setStatusCode(HttpStatus.OK.value());
 
             return ResponseEntity.ok(responseDTO);

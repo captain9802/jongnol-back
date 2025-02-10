@@ -8,6 +8,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 
 @Entity
@@ -29,6 +30,9 @@ public class User {
     private LocalDateTime userRegdate;
     private String role;
     private long profileImg;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Quiz> quizzes;
 
     public UserDTO toDTO() {
         return UserDTO.builder()

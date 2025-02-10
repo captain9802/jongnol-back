@@ -4,6 +4,7 @@ import com.example.jongnolback.entity.User;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Getter
 @NoArgsConstructor
@@ -20,6 +21,8 @@ public class UserDTO {
     private String role;
     private String token;
     private long profileImg;
+    private List<QuizDTO> quizzes;
+
     public User toEntity() {
         return User.builder()
                 .id(this.id)

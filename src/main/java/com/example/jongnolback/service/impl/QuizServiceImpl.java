@@ -118,4 +118,9 @@ public class QuizServiceImpl implements QuizService {
                         .build())
                 .collect(Collectors.toList());
     }
+
+    @Override
+    public void deleteById(Long id) {
+        quizRepository.deleteById(id);
+    }
 }
