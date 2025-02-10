@@ -29,24 +29,16 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserDTO login(UserDTO userDTO) {
         Optional<User> loginUser = userRepository.findByUserName(userDTO.getUserName());
-        System.out.println("11111111111111111111111111111111111111111111");
 
         if(loginUser.isEmpty()) {
-            System.out.println("222222222222222222222222222");
             throw new RuntimeException("not exist userid");
         }
 
         if(!passwordEncoder.matches(userDTO.getUserPw(), loginUser.get().getUserPw())) {
-            System.out.println("33333333333333333333333333333333");
             throw new RuntimeException("wrong password");
         }
-        System.out.println("4444444444444444444444444444444444444444");
-
         UserDTO loginUserDTO = loginUser.get().toDTO();
-        System.out.println("555555555555555555555555555555555");
-
         loginUserDTO.setToken(jwtTokenProvider.create(loginUser.get()));
-        System.out.println("6666666666666666666666666666666666");
 
         return loginUserDTO;
     }
