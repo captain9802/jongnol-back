@@ -1,5 +1,6 @@
 package com.example.jongnolback.service.impl;
 
+import com.example.jongnolback.common.FileUtils;
 import com.example.jongnolback.dto.QuestionDTO;
 import com.example.jongnolback.dto.QuizDTO;
 import com.example.jongnolback.entity.CustomUserDetails;
@@ -17,6 +18,7 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -28,7 +30,7 @@ import java.util.stream.Collectors;
 public class QuizServiceImpl implements QuizService {
     private final QuizRepository quizRepository;
     private final QuestionRepository questionRepository;
-
+    private  final FileUtils fileUtils;
     public QuizDTO createQuiz(QuizDTO quizDTO, User user) {
         // QuizDTO -> Quiz 엔티티로 변환
         Quiz quiz = Quiz.builder()
@@ -45,21 +47,31 @@ public class QuizServiceImpl implements QuizService {
         // 문제들 저장
         if (quizDTO.getQuestions() != null) {
             for (QuestionDTO questionDTO : quizDTO.getQuestions()) {
+                // 이미지가 base64 형식으로 들어오는 경우, S3에 업로드
+                String uploadedImagePath = null;
+                if (questionDTO.getImageBox() != null && !questionDTO.getImageBox().isEmpty()) {
+                    try {
+                        MultipartFile imageFile = fileUtils.convertBase64ToMultipartFile(questionDTO.getImageBox(), "question_image.png");
+                        uploadedImagePath = fileUtils.uploadFile(imageFile, "question-images/");
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+
                 Question question = Question.builder()
                         .quiz(quiz)
                         .subtitle(questionDTO.getSubtitle())
                         .type(questionDTO.getType())
                         .tanswer(questionDTO.getTanswer())
                         .fanswers(questionDTO.getFanswers())
-                        .imageBox(questionDTO.getImageBox())
+                        .imageBox(uploadedImagePath)
                         .build();
-                // 문제 저장
+
                 questionRepository.save(question);
                 System.out.println(question.getFanswers());
             }
         }
 
-        // 저장된 퀴즈를 DTO로 변환하여 반환
         return quiz.toDTO();
     }
 
@@ -90,10 +102,18 @@ public class QuizServiceImpl implements QuizService {
 
         Quiz question =  quizRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Quiz not found with id: " + id));
 
+        for (Question q : question.getQuestions()) {
+            if (q.getImageBox() != null) {
+                String imageBoxUrl = fileUtils.getObjectUrl(q.getImageBox());
+                q.setImageBox(imageBoxUrl);  // S3 URL로 설정
+            }
+        }
+
         Quiz quiz = Quiz.builder()
                 .id(question.getId())
                 .title(question.getTitle())
                 .description(question.getDescription())
+                .thumbnail(fileUtils.getObjectUrl(question.getThumbnail()))
                 .createdAt(question.getCreatedAt())
                 .user(question.getUser())
                 .questions(question.getQuestions())

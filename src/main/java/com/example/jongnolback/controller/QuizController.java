@@ -1,5 +1,6 @@
 package com.example.jongnolback.controller;
 
+import com.example.jongnolback.common.FileUtils;
 import com.example.jongnolback.dto.QuestionDTO;
 import com.example.jongnolback.dto.QuizDTO;
 import com.example.jongnolback.dto.ResponseDTO;
@@ -18,6 +19,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import java.time.LocalDateTime;
 import java.util.Arrays;
@@ -33,14 +39,24 @@ public class QuizController {
     private final UserService userService;
     private final QuizService quizService;
     private final QuestionService questionService;
+    private final FileUtils fileUtils;
+
     @PostMapping("/newquiz")
     public ResponseEntity<?> newquiz(@RequestBody QuizDTO quizDTO ,
                                                             @AuthenticationPrincipal CustomUserDetails customUserDetails) {
         ResponseDTO<QuizDTO> responseDTO = new ResponseDTO<>();
         try {
-                User user = customUserDetails.getUser();
-                QuizDTO newQuizDTO = quizService.createQuiz(quizDTO, user);
-                responseDTO.setData(quizDTO);
+            User user = customUserDetails.getUser();
+
+            MultipartFile thumbnailFile = fileUtils.convertBase64ToMultipartFile(quizDTO.getThumbnail(), "thumbnail.png");
+
+            String uploadedThumbnailPath = fileUtils.uploadFile(thumbnailFile, "quiz-thumbnails/");
+
+            quizDTO.setThumbnail(uploadedThumbnailPath);
+
+            QuizDTO newQuizDTO = quizService.createQuiz(quizDTO, user);
+
+            responseDTO.setData(newQuizDTO);
             responseDTO.setStatusCode(HttpStatus.OK.value());
             return ResponseEntity.ok(responseDTO);
         } catch (Exception e) {
@@ -74,6 +90,11 @@ public class QuizController {
         try {
             List<QuizDTO> quizzes = quizService.getQuizzes(searchCondition, searchKeyword, offset, limit);
 
+            for (QuizDTO quiz : quizzes) {
+                String thumbnailUrl = fileUtils.getObjectUrl(quiz.getThumbnail());
+                quiz.setThumbnail(thumbnailUrl);
+            }
+
             boolean hasMoreData = quizzes.size() == limit;
 
             responseDTO.setHasMore(hasMoreData);
@@ -100,6 +121,11 @@ public class QuizController {
         try {
             List<QuizDTO> quizzes = quizService.getMyQuizzes(customUserDetails, offset, limit);
 
+            for (QuizDTO quiz : quizzes) {
+                String thumbnailUrl = fileUtils.getObjectUrl(quiz.getThumbnail());
+                quiz.setThumbnail(thumbnailUrl);
+            }
+
             boolean hasMoreData = quizzes.size() == limit;
 
             responseDTO.setHasMore(hasMoreData);
@@ -122,8 +148,22 @@ public class QuizController {
         ResponseDTO<QuizDTO> responseDTO = new ResponseDTO<>();
         try {
             Quiz quiz = quizService.findById(id);
+
             if (quiz.getUser().getId() == customUserDetails.getUser().getId()) {
+                if (quiz.getThumbnail() != null && !quiz.getThumbnail().isEmpty()) {
+                    System.out.println("quiz.getThumbnail() :" +quiz.getThumbnail());
+                    fileUtils.deleteFile(quiz.getThumbnail());
+                }
+                if (quiz.getQuestions() != null) {
+                    for (Question question : quiz.getQuestions()) {
+                        if (question.getImageBox() != null && !question.getImageBox().isEmpty()) {
+                            System.out.println("question.getImageBox() :"  + question.getImageBox());
+                            fileUtils.deleteFile(question.getImageBox());
+                        }
+                    }
+                }
                 quizService.deleteById(id);
+
                 responseDTO.setStatusCode(HttpStatus.OK.value());
                 return ResponseEntity.ok(responseDTO);
             } else {
