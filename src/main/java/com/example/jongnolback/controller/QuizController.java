@@ -1,15 +1,13 @@
 package com.example.jongnolback.controller;
 
 import com.example.jongnolback.common.FileUtils;
-import com.example.jongnolback.dto.QuestionDTO;
-import com.example.jongnolback.dto.QuizDTO;
-import com.example.jongnolback.dto.ResponseDTO;
-import com.example.jongnolback.dto.UserDTO;
+import com.example.jongnolback.dto.*;
 import com.example.jongnolback.entity.CustomUserDetails;
 import com.example.jongnolback.entity.Question;
 import com.example.jongnolback.entity.Quiz;
 import com.example.jongnolback.entity.User;
 import com.example.jongnolback.repository.QuestionRepository;
+import com.example.jongnolback.service.ImageService;
 import com.example.jongnolback.service.QuestionService;
 import com.example.jongnolback.service.QuizService;
 import com.example.jongnolback.service.UserService;
@@ -40,6 +38,7 @@ public class QuizController {
     private final QuizService quizService;
     private final QuestionService questionService;
     private final FileUtils fileUtils;
+    private final ImageService imageService;
 
     @PostMapping("/newquiz")
     public ResponseEntity<?> newquiz(@RequestBody QuizDTO quizDTO ,
@@ -66,6 +65,26 @@ public class QuizController {
             return ResponseEntity.badRequest().body(responseDTO);
         }
     }
+    @PostMapping("/temporaryload")
+    public ResponseEntity<?> uploadTemporaryImage(@RequestBody ImageDTO imageDTO) {
+        try {
+            String imageUrl = imageService.saveTemporaryImage(imageDTO.getImage());
+            return ResponseEntity.ok(new ImageResponseDTO(imageUrl));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("이미지 업로드 실패");
+        }
+    }
+
+    @DeleteMapping("/deletetemporary")
+    public ResponseEntity<?> deleteTemporaryImage(@RequestBody ImageDTO imageDTO) {
+        try {
+            String imageUrl = imageService.deleteTemporaryImage(imageDTO.getImage());
+            return ResponseEntity.ok("이미지 삭제 성공");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("이미지 삭제 실패");
+        }
+    }
+
 
     @GetMapping("/solvequiz/{id}")
     public  ResponseEntity<?> solvequiz(@PathVariable Long id) {
@@ -151,13 +170,11 @@ public class QuizController {
 
             if (quiz.getUser().getId() == customUserDetails.getUser().getId()) {
                 if (quiz.getThumbnail() != null && !quiz.getThumbnail().isEmpty()) {
-                    System.out.println("quiz.getThumbnail() :" +quiz.getThumbnail());
                     fileUtils.deleteFile(quiz.getThumbnail());
                 }
                 if (quiz.getQuestions() != null) {
                     for (Question question : quiz.getQuestions()) {
                         if (question.getImageBox() != null && !question.getImageBox().isEmpty()) {
-                            System.out.println("question.getImageBox() :"  + question.getImageBox());
                             fileUtils.deleteFile(question.getImageBox());
                         }
                     }

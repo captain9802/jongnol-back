@@ -59,13 +59,6 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void updateProfile(UserDTO user, UserDTO userDTO) {
-        user.setUserNickName(userDTO.getUserNickName());
-        user.setProfileImg(userDTO.getProfileImg());
-        userRepository.save(user.toEntity());
-    }
-
-    @Override
     public void deleteById(long id) {
         userRepository.deleteById(id);
     }

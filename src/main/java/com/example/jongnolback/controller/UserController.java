@@ -54,8 +54,6 @@ public class UserController {
 
         try {
             UserDTO loginUserDTO = userService.login(userDTO);
-            System.out.println("loginUserDTO :" + loginUserDTO.getUserName());
-            System.out.println("loginUserDTO :" + loginUserDTO.getUserNickName());
 
             loginUserDTO.setUserPw("");
 
@@ -80,6 +78,7 @@ public class UserController {
     }
 
     @PostMapping("/nickname-check")
+    @CrossOrigin(origins = "http://jongnol.site")
     public  ResponseEntity<?> nicknameCheck(@RequestBody UserDTO userDTO) {
         ResponseDTO<Map<String, String>> responseDTO = new ResponseDTO<>();
         try {
@@ -174,17 +173,11 @@ public class UserController {
             try {
                 UserDTO user = customUserDetails.getUser().toDTO();
                 long idCheck = userService.nicknameCheck(userDTO);
-                if (!user.getUserNickName().equals(userDTO.getUserNickName())) {
-                    if (idCheck == 0) {
-                        userService.updateProfile(user,userDTO);
-                    } else {
-                        responseDTO.setErrorMessage("중복된 닉네임입니다.");
-                        responseDTO.setErrorCode(102);
-                        responseDTO.setStatusCode(HttpStatus.BAD_REQUEST.value());
-                        return ResponseEntity.badRequest().body(responseDTO);
-                    }
+                if (idCheck == 1) {
+                    user.updateProfile(user.getUserNickName(), userDTO.getProfileImg());
+                } else if (idCheck == 0) {
+                    user.updateProfile(userDTO.getUserNickName(), userDTO.getProfileImg());
                 }
-                userService.updateProfile(user, userDTO);
                 responseDTO.setItem(user);
                 responseDTO.setStatusCode(HttpStatus.OK.value());
                 return ResponseEntity.ok(responseDTO);
@@ -193,7 +186,6 @@ public class UserController {
                 responseDTO.setErrorCode(101);
                 responseDTO.setStatusCode(HttpStatus.BAD_REQUEST.value());
                 return ResponseEntity.badRequest().body(responseDTO);
-
         }
     }
 }

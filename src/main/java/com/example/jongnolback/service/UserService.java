@@ -15,7 +15,6 @@ public interface UserService {
 
     long getUserCount();
 
-    void updateProfile(UserDTO user, UserDTO userDTO);
-
     void deleteById(long id);
+
 }

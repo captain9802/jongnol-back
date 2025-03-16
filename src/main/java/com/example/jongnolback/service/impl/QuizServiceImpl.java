@@ -47,17 +47,24 @@ public class QuizServiceImpl implements QuizService {
         // 문제들 저장
         if (quizDTO.getQuestions() != null) {
             for (QuestionDTO questionDTO : quizDTO.getQuestions()) {
-                // 이미지가 base64 형식으로 들어오는 경우, S3에 업로드
                 String uploadedImagePath = null;
                 if (questionDTO.getImageBox() != null && !questionDTO.getImageBox().isEmpty()) {
-                    try {
-                        MultipartFile imageFile = fileUtils.convertBase64ToMultipartFile(questionDTO.getImageBox(), "question_image.png");
-                        uploadedImagePath = fileUtils.uploadFile(imageFile, "question-images/");
-                    } catch (Exception e) {
-                        e.printStackTrace();
+                    String imageUrl = questionDTO.getImageBox();
+
+                    if (fileUtils.isValidImageUrl(imageUrl)) {
+                        String tempImagePath = imageUrl;
+                        String newImagePath = "question-images/" + tempImagePath.substring(tempImagePath.lastIndexOf("/") + 1); // 새로운 경로
+                        try {
+                            fileUtils.copyFile(tempImagePath, newImagePath);
+                            fileUtils.deleteFile(tempImagePath);
+                            uploadedImagePath = fileUtils.getObjectUrl(newImagePath);
+                        } catch (Exception e) {
+                            uploadedImagePath = "https://jongnol-0224.s3.ap-northeast-2.amazonaws.com/default_image.png";
+                        }
                     }
                 }
 
+                // 나머지 로직 처리
                 Question question = Question.builder()
                         .quiz(quiz)
                         .subtitle(questionDTO.getSubtitle())
@@ -68,10 +75,8 @@ public class QuizServiceImpl implements QuizService {
                         .build();
 
                 questionRepository.save(question);
-                System.out.println(question.getFanswers());
             }
         }
-
         return quiz.toDTO();
     }
 
@@ -105,7 +110,7 @@ public class QuizServiceImpl implements QuizService {
         for (Question q : question.getQuestions()) {
             if (q.getImageBox() != null) {
                 String imageBoxUrl = fileUtils.getObjectUrl(q.getImageBox());
-                q.setImageBox(imageBoxUrl);  // S3 URL로 설정
+                q.setImageBox(imageBoxUrl);
             }
         }
 

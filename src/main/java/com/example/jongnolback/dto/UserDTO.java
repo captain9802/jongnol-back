@@ -4,7 +4,9 @@ import com.example.jongnolback.entity.User;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Getter
 @NoArgsConstructor
@@ -32,5 +34,9 @@ public class UserDTO {
                 .userRegdate(LocalDateTime.parse(this.userRegdate))
                 .profileImg(this.profileImg)
                 .build();
+    }
+    public void updateProfile(String userNickName, long profileImg) {
+        this.userNickName = userNickName;
+        this.profileImg = profileImg;
     }
 }

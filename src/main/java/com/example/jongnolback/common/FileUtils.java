@@ -5,10 +5,7 @@ import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.client.builder.AwsClientBuilder;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
-import com.amazonaws.services.s3.model.CannedAccessControlList;
-import com.amazonaws.services.s3.model.DeleteObjectRequest;
-import com.amazonaws.services.s3.model.ObjectMetadata;
-import com.amazonaws.services.s3.model.PutObjectRequest;
+import com.amazonaws.services.s3.model.*;
 import com.example.jongnolback.configuration.AmazonConfiguration;
 import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +17,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.Base64;
 import java.util.Date;
@@ -53,6 +52,20 @@ public class FileUtils {
                 .build();
     }
 
+    public boolean isValidImageUrl(String imageUrl) {
+        try {
+            URL url = new URL(imageUrl);
+            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+            connection.setRequestMethod("HEAD");
+            connection.connect();
+
+            int responseCode = connection.getResponseCode();
+            return responseCode == HttpURLConnection.HTTP_OK;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
     public String uploadFile(MultipartFile multipartFile, String directory) {
         String fileOrigin = multipartFile.getOriginalFilename();
 
@@ -70,13 +83,14 @@ public class FileUtils {
         try (InputStream fileInputStream = multipartFile.getInputStream()) {
             ObjectMetadata objectMetadata = new ObjectMetadata();
             objectMetadata.setContentType(multipartFile.getContentType());
+            objectMetadata.setContentLength(multipartFile.getSize());
 
             PutObjectRequest putObjectRequest = new PutObjectRequest(
                     bucketName,
                     filePath,
                     fileInputStream,
                     objectMetadata
-            ).withCannedAcl(CannedAccessControlList.PublicRead); // 퍼블릭 접근 설정
+            ).withCannedAcl(CannedAccessControlList.PublicRead);
 
             s3.putObject(putObjectRequest);
         } catch (Exception e) {
@@ -89,7 +103,13 @@ public class FileUtils {
     }
 
     public String getObjectUrl(String filePath) {
-        return s3.getUrl(bucketName, filePath).toString();  // 파일 URL 반환
+        if (filePath == null || filePath.isEmpty()) {
+            return null;
+        }
+        if (filePath.startsWith("https://")) {
+            return filePath;
+        }
+        return "https://jongnol-0224.s3.ap-northeast-2.amazonaws.com/" + filePath;
     }
 
     // base64 문자열을 MultipartFile로 변환하는 메서드
@@ -98,12 +118,32 @@ public class FileUtils {
         byte[] decodedBytes = Base64.getDecoder().decode(base64Arr[1]);  // base64 값 추출
         ByteArrayInputStream bis = new ByteArrayInputStream(decodedBytes);
 
-        // CustomMultipartFile을 사용하여 MultipartFile을 구현
         return new CustomMultipartFile(fileName, decodedBytes, bis);
     }
 
     public void deleteFile(String filePath) {
         s3.deleteObject(new DeleteObjectRequest(bucketName, filePath));
+    }
+
+    public void copyFile(String tempImagePath, String newImagePath) {
+        try {
+            String sourceKey = tempImagePath.replace("https://jongnol-0224.s3.ap-northeast-2.amazonaws.com/", "");
+            String destinationKey = newImagePath.replace("https://jongnol-0224.s3.ap-northeast-2.amazonaws.com/", "");
+
+            CopyObjectRequest copyObjRequest = new CopyObjectRequest(
+                    bucketName,         // 소스 버킷 이름
+                    sourceKey,          // 소스 파일 경로 (temp 폴더 내의 파일)
+                    bucketName,         // 대상 버킷 이름
+                    destinationKey      // 대상 파일 경로 (question-images 폴더로 복사)
+            );
+
+            s3.copyObject(copyObjRequest);
+            deleteFile(sourceKey);
+
+        } catch (Exception e) {
+            // 예외가 발생하면 복사 실패 로그 출력
+            throw new RuntimeException("파일 복사 실패", e);
+        }
     }
 
     // CustomMultipartFile 클래스 구현
