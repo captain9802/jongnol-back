@@ -9,18 +9,14 @@ import com.example.jongnolback.entity.Quiz;
 import com.example.jongnolback.entity.User;
 import com.example.jongnolback.repository.QuestionRepository;
 import com.example.jongnolback.repository.QuizRepository;
-import com.example.jongnolback.repository.QuizRepositoryCustom;
-import com.example.jongnolback.repository.UserRepository;
 import com.example.jongnolback.service.QuizService;
-import com.mysql.cj.protocol.x.Notice;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -147,5 +143,51 @@ public class QuizServiceImpl implements QuizService {
     @Override
     public void deleteById(Long id) {
         quizRepository.deleteById(id);
+    }
+    @Override
+    public QuizDTO getQuizQuestions(Long id, QuizDTO quizDTO) {
+        try {
+            Quiz quiz = quizRepository.findById(id)
+                    .orElseThrow(() -> new RuntimeException("Quiz not found"));
+
+            int questionsCount = quizDTO.getQuestionsCount();
+            int quizMode = quizDTO.getQuizMode();
+
+            List<QuestionDTO> limitedQuestions = getLimitedQuestions(quiz, questionsCount, quizMode);
+
+            return buildQuizDTO(quiz, limitedQuestions);
+        } catch (Exception e) {
+            System.out.println("Error occurred: " + e.getMessage());
+            throw new RuntimeException("Error occurred while getting quiz questions: " + e.getMessage());
+        }
+    }
+
+    private List<QuestionDTO> getLimitedQuestions(Quiz quiz, int questionsCount, int quizMode) {
+        List<Question> questions = quiz.getQuestions();
+
+        if (quizMode == 1) {
+            Collections.shuffle(questions);
+        }
+
+        if (questions.size() > questionsCount) {
+            questions = questions.subList(0, questionsCount);
+        }
+
+        return questions.stream()
+                .map(Question::toDTO)
+                .collect(Collectors.toList());
+    }
+
+    private QuizDTO buildQuizDTO(Quiz quiz, List<QuestionDTO> limitedQuestions) {
+        return QuizDTO.builder()
+                .id(quiz.getId())
+                .title(quiz.getTitle())
+                .description(quiz.getDescription())
+                .createdAt(quiz.getCreatedAt().toString())
+                .thumbnail(quiz.getThumbnail())
+                .userId(quiz.getUser().getId())
+                .questions(limitedQuestions)
+                .questionsCount(limitedQuestions.size())
+                .build();
     }
 }

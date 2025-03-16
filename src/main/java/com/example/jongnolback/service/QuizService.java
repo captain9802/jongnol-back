@@ -20,4 +20,6 @@ public interface QuizService {
     List<QuizDTO> getMyQuizzes(CustomUserDetails customUserDetails, int offset, int limit);
 
     void deleteById(Long id);
+
+    QuizDTO getQuizQuestions(Long id, QuizDTO quizDTO);
 }

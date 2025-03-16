@@ -25,6 +25,7 @@ public class QuizDTO {
     private String searchKeyword;
     private String searchCondition;
     private int questionsCount;
+    private int quizMode;
 
     public Quiz toEntity(User user) {
         Quiz quizEntity = Quiz.builder()

@@ -86,11 +86,11 @@ public class QuizController {
     }
 
 
-    @GetMapping("/solvequiz/{id}")
-    public  ResponseEntity<?> solvequiz(@PathVariable Long id) {
+    @PostMapping("/solvequiz/{id}")
+    public  ResponseEntity<?> solvequiz(@PathVariable Long id, @RequestBody QuizDTO quizDTO ) {
 
         try {
-            Quiz quiz = quizService.findById(id);
+            QuizDTO quiz = quizService.getQuizQuestions(id, quizDTO);
             return ResponseEntity.ok(quiz);
         } catch(Exception e) {
             System.out.println(e.getMessage());
